@@ -13,8 +13,7 @@ const trackSchema = new mongoose.Schema({
   },
   artist: String,
   addedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    type: String,
     required: true,
   },
   votes: {
@@ -28,5 +27,5 @@ const trackSchema = new mongoose.Schema({
   },
 });
 
-const Track = mongoose.model("Track", trackSchema);
+const Track = mongoose.models.Track || mongoose.model("Track", trackSchema);
 export default Track;

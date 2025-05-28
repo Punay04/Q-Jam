@@ -1,11 +1,15 @@
+"use client";
+import { UserButton, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import React, { useState } from "react";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const user = useUser();
+
   return (
-    <nav className="bg-black/95 fixed w-full backdrop-blur-sm border-b border-pink-900/40 z-50">
+    <nav className="bg-black/50 fixed w-full backdrop-blur-sm border-b border-pink-900/40 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link
@@ -16,6 +20,7 @@ const Navbar = () => {
           </Link>
 
           <div className="hidden sm:flex items-center gap-4">
+            (!user &&{" "}
             <Link
               href={"/signin"}
               className="px-4 py-2 text-pink-400 border border-pink-500/50 rounded-lg 
@@ -30,9 +35,10 @@ const Navbar = () => {
             >
               Sign up
             </Link>
+            )
+            {user && <UserButton />}
           </div>
 
-          {/* Mobile Menu Button */}
           <button
             className="sm:hidden p-2 rounded-lg text-pink-400 hover:bg-pink-500/10"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -62,9 +68,9 @@ const Navbar = () => {
           </button>
         </div>
 
-        {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="sm:hidden mt-2">
+            (!user &&{" "}
             <Link
               href={"/signin"}
               className="block px-4 py-2 text-pink-400 border border-pink-500/50 rounded-lg 
@@ -79,6 +85,8 @@ const Navbar = () => {
             >
               Sign up
             </Link>
+            )
+            <UserButton />
           </div>
         )}
       </div>

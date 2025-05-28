@@ -25,7 +25,10 @@ const nowPlayingSchema = new mongoose.Schema({
   },
 });
 
-const NowPlaying = mongoose.model("NowPlaying", nowPlayingSchema);
+nowPlayingSchema.index(
+  { isActive: 1 },
+  { unique: true, partialFilterExpression: { isActive: true } }
+);
 
-nowPlayingSchema.index({}, { unique: true });
+const NowPlaying = mongoose.models.NowPlaying || mongoose.model("NowPlaying", nowPlayingSchema);
 export default NowPlaying;

@@ -1,8 +1,11 @@
+import connectToDatabase from "@/lib/db";
 import Track from "@/models/track";
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
+  await connectToDatabase();
+
   const user = await auth();
   if (req.body === null) {
     return new Response("No body provided", { status: 400 });
@@ -18,9 +21,15 @@ export async function POST(req: NextRequest) {
     const response = await fetch(
       `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${youtubeId}&key=${process.env.YOUTUBE_API_KEY}`
     );
+    console.log(
+      "YouTube API key:",
+      process.env.YOUTUBE_API_KEY ? "exists" : "missing"
+    );
     if (!response.ok) {
-      return new Response("Failed to fetch video details", {
+      return NextResponse.json({
+        message: "Failed to fetch video details",
         status: response.status,
+        response: response.statusText,
       });
     }
     const data = await response.json();
@@ -47,13 +56,33 @@ export async function POST(req: NextRequest) {
         youtubeId: track.youtubeId,
         title: track.title,
         artist: track.artist,
-        addedBy: user.userId
+        addedBy: user.userId,
       });
       return NextResponse.json({ message: "Track added successfully", track });
     } catch (error) {
-      return new Response("Error saving track to database", { status: 500 });
+      return NextResponse.json({
+        message: "Error saving track to database",
+        error,
+      });
     }
   } catch (error) {
     return new Response("Error fetching video details", { status: 500 });
+  }
+}
+
+export async function GET(req: NextRequest) {
+  await connectToDatabase();
+  const user = await auth();
+  if (!user) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
+  try {
+    const tracks = await Track.find({ addedBy: user.userId }).sort({
+      createdAt: -1,
+    });
+    return NextResponse.json(tracks);
+  } catch (error) {
+    return new Response("Error fetching tracks", { status: 500 });
   }
 }

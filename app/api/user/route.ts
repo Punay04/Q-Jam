@@ -1,8 +1,10 @@
+import connectToDatabase from "@/lib/db";
 import User from "@/models/user";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 export async function POST() {
+  await connectToDatabase();
   const user = await auth();
 
   if (!user) {
