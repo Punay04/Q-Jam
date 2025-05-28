@@ -1,7 +1,9 @@
 import Track from "@/models/track";
+import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
+  const user = await auth();
   if (req.body === null) {
     return new Response("No body provided", { status: 400 });
   }
@@ -45,6 +47,7 @@ export async function POST(req: NextRequest) {
         youtubeId: track.youtubeId,
         title: track.title,
         artist: track.artist,
+        addedBy: user.userId
       });
       return NextResponse.json({ message: "Track added successfully", track });
     } catch (error) {

@@ -1,7 +1,10 @@
+import { ClerkProvider } from "@clerk/nextjs";
 import Image from "next/image";
 
 export default function Home() {
   return (
-    <div>hi</div>
+    <ClerkProvider>
+      <div></div>
+    </ClerkProvider>
   );
 }
