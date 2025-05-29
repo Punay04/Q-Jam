@@ -2,35 +2,10 @@
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 
-// Add a minimal YT type declaration for TypeScript
 declare global {
-  namespace YT {
-    interface Player {
-      loadVideoById(videoId: string): void;
-      playVideo(): void;
-    }
-    interface PlayerEvent {
-      target: Player;
-    }
-    interface OnStateChangeEvent {
-      data: number;
-      target: Player;
-    }
-    interface OnErrorEvent {
-      data: number;
-      target: Player;
-    }
-    enum PlayerState {
-      ENDED = 0,
-      PLAYING = 1,
-      PAUSED = 2,
-      BUFFERING = 3,
-      CUED = 5,
-    }
-  }
   interface Window {
+    onYouTubeIframeAPIReady?: () => void;
     YT: typeof YT;
-    onYouTubeIframeAPIReady: () => void;
   }
 }
 
@@ -118,7 +93,9 @@ const HeroRight = () => {
 
     try {
       if (playerRef.current) {
-        playerRef.current.loadVideoById(nowPlaying.youtubeId);
+        playerRef.current = new (window.YT as typeof YT).Player(
+          "youtube-player"
+        );
       } else {
         playerRef.current = new (window.YT as any).Player("youtube-player", {
           height: "360",

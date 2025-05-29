@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Caveat_Brush, Geist, Geist_Mono } from "next/font/google";
+import { Caveat_Brush } from "next/font/google";
 import "./globals.css";
 
 const caveat = Caveat_Brush({

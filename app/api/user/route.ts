@@ -3,6 +3,11 @@ import User from "@/models/user";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
+interface MongoError extends Error {
+  code?: number;
+  message: string;
+}
+
 export async function POST() {
   await connectToDatabase();
   const { userId } = await auth();
@@ -27,15 +32,17 @@ export async function POST() {
 
     return NextResponse.json({ message: "User created successfully" });
   } catch (error) {
-    if (typeof error === "object" && error !== null && "code" in error && (error as any).code === 11000) {
+    const err = error as MongoError;
+
+    if (err && err.code === 11000) {
       return NextResponse.json(
-        { message: "Duplicate key error", error: (error as any).message },
+        { message: "Duplicate key error", error: err.message },
         { status: 400 }
       );
     }
 
     return NextResponse.json(
-      { message: "Error creating user", error: (error as any)?.message ?? "Unknown error" },
+      { message: "Error creating user", error: err.message ?? "Unknown error" },
       { status: 500 }
     );
   }
