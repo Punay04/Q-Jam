@@ -9,6 +9,8 @@ declare global {
   }
 }
 
+export {};
+
 interface NowPlayingTrack {
   youtubeId: string;
   title: string;
@@ -97,7 +99,7 @@ const HeroRight = () => {
           "youtube-player"
         );
       } else {
-        playerRef.current = new (window.YT as any).Player("youtube-player", {
+        playerRef.current = new window.YT.Player("youtube-player", {
           height: "360",
           width: "640",
           videoId: nowPlaying.youtubeId,
@@ -105,21 +107,19 @@ const HeroRight = () => {
             autoplay: 1,
             modestbranding: 1,
             rel: 0,
-            controls: 0, // 🔒 Hide controls (no pause/seek)
-            disablekb: 1, // 🔒 Disable keyboard controls
+            controls: 0,
+            disablekb: 1,
           },
           events: {
-            onReady: (event: YT.PlayerEvent) => {
-              event.target.playVideo();
-            },
-            onStateChange: (event: YT.OnStateChangeEvent) => {
+            onReady: (event) => event.target.playVideo(),
+            onStateChange: (event) => {
               if (event.data === window.YT.PlayerState.ENDED) {
                 loadNowPlaying();
               }
             },
-            onError: (event: YT.OnErrorEvent) => {
+            onError: (event) => {
               console.error("YouTube Player Error:", event);
-              loadNowPlaying(); // Load next song on error
+              loadNowPlaying();
             },
           },
         });
