@@ -1,5 +1,6 @@
 import connectToDatabase from "@/lib/db";
 import Track from "@/models/track";
+import Vote from "@/models/vote";
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -78,10 +79,48 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const tracks = await Track.find({ addedBy: user.userId }).sort({
-      createdAt: -1,
+    const tracks = await Track.find({}).sort({ createdAt: -1 });
+    const voteCounts = await Vote.aggregate([
+      {
+        $group: {
+          _id: "$track",
+          upvotes: {
+            $sum: { $cond: [{ $eq: ["$voteType", "upvote"] }, 1, 0] },
+          },
+          downvotes: {
+            $sum: { $cond: [{ $eq: ["$voteType", "downvote"] }, 1, 0] },
+          },
+        },
+      },
+    ]);
+
+    const voteMap: {
+      [key: string]: { upvotes: number; downvotes: number; total: number };
+    } = {};
+    voteCounts.forEach((vote) => {
+      voteMap[vote._id.toString()] = {
+        upvotes: vote.upvotes,
+        downvotes: vote.downvotes,
+        total: vote.upvotes - vote.downvotes,
+      };
     });
-    return NextResponse.json(tracks);
+
+    const tracksWithVotes = tracks.map((track) => {
+      const votes = voteMap[track._id.toString()] || {
+        upvotes: 0,
+        downvotes: 0,
+        total: 0,
+      };
+
+      return {
+        ...track.toObject(),
+        voteCount: votes.total,
+        upvotes: votes.upvotes,
+        downvotes: votes.downvotes,
+      };
+    });
+
+    return NextResponse.json(tracksWithVotes);
   } catch (error) {
     return new Response("Error fetching tracks", { status: 500 });
   }

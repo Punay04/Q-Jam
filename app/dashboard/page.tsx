@@ -14,7 +14,7 @@ const Dashboard = () => {
 
   return (
     <ClerkProvider>
-      <div className="h-screen bg-gray-950 ">
+      <div className="h-full bg-gray-950 ">
         <Navbar />
         <HeroSection />
       </div>

@@ -5,8 +5,7 @@ import React, { useState } from "react";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const user = useUser();
+  const { isSignedIn, user } = useUser();
 
   return (
     <nav className="bg-black/50 fixed w-full backdrop-blur-sm border-b border-pink-900/40 z-50">
@@ -20,28 +19,32 @@ const Navbar = () => {
           </Link>
 
           <div className="hidden sm:flex items-center gap-4">
-            (!user &&{" "}
-            <Link
-              href={"/signin"}
-              className="px-4 py-2 text-pink-400 border border-pink-500/50 rounded-lg 
-                hover:bg-pink-500/10 transition-all duration-200 text-sm font-medium"
-            >
-              Sign in
-            </Link>
-            <Link
-              href={"/signup"}
-              className="px-4 py-2 bg-pink-600 text-white rounded-lg 
-                hover:bg-pink-700 transition-all duration-200 text-sm font-medium"
-            >
-              Sign up
-            </Link>
-            )
-            {user && <UserButton />}
+            {!isSignedIn ? (
+              <>
+                <Link
+                  href="/signin"
+                  className="px-4 py-2 text-pink-400 border border-pink-500/50 rounded-lg 
+                    hover:bg-pink-500/10 transition-all duration-200 text-sm font-medium"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/signup"
+                  className="px-4 py-2 bg-pink-600 text-white rounded-lg 
+                    hover:bg-pink-700 transition-all duration-200 text-sm font-medium"
+                >
+                  Sign up
+                </Link>
+              </>
+            ) : (
+              <UserButton />
+            )}
           </div>
 
           <button
             className="sm:hidden p-2 rounded-lg text-pink-400 hover:bg-pink-500/10"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle menu"
           >
             <svg
               className="w-6 h-6"
@@ -69,24 +72,29 @@ const Navbar = () => {
         </div>
 
         {isMenuOpen && (
-          <div className="sm:hidden mt-2">
-            (!user &&{" "}
-            <Link
-              href={"/signin"}
-              className="block px-4 py-2 text-pink-400 border border-pink-500/50 rounded-lg 
-                hover:bg-pink-500/10 transition-all duration-200 text-sm font-medium"
-            >
-              Sign in
-            </Link>
-            <Link
-              href={"/signup"}
-              className="block px-4 py-2 bg-pink-600 text-white rounded-lg 
-                hover:bg-pink-700 transition-all duration-200 text-sm font-medium mt-2"
-            >
-              Sign up
-            </Link>
-            )
-            <UserButton />
+          <div className="sm:hidden py-2 space-y-2">
+            {!isSignedIn ? (
+              <>
+                <Link
+                  href="/signin"
+                  className="block px-4 py-2 text-pink-400 border border-pink-500/50 rounded-lg 
+                    hover:bg-pink-500/10 transition-all duration-200 text-sm font-medium"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/signup"
+                  className="block px-4 py-2 bg-pink-600 text-white rounded-lg 
+                    hover:bg-pink-700 transition-all duration-200 text-sm font-medium"
+                >
+                  Sign up
+                </Link>
+              </>
+            ) : (
+              <div className="px-4">
+                <UserButton />
+              </div>
+            )}
           </div>
         )}
       </div>

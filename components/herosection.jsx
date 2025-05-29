@@ -4,10 +4,12 @@ import HeroRight from "./heroright";
 
 const HeroSection = () => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-30 p-10">
-      <HeroLeft />
-      <HeroRight />
-    </div>
+    <main className="min-h-screen bg--black">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-30 p-10">
+        <HeroLeft />
+        <HeroRight />
+      </div>
+    </main>
   );
 };
 

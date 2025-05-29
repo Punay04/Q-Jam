@@ -1,12 +1,11 @@
 import mongoose from "mongoose";
 
 const voteSchema = new mongoose.Schema({
-  user : {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+  user: {
+    type: String,
     required: true,
   },
-  track : {
+  track: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Track",
     required: true,
@@ -24,9 +23,9 @@ const voteSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
-})
+});
 
 voteSchema.index({ user: 1, track: 1 }, { unique: true });
 
-const Vote = mongoose.model("Vote", voteSchema);
+const Vote = mongoose.models.Vote || mongoose.model("Vote", voteSchema);
 export default Vote;

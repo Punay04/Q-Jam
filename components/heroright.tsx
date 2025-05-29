@@ -1,16 +1,19 @@
 "use client";
 import axios from "axios";
-import { log } from "console";
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+
+declare global {
+  interface Window {
+    YT: any;
+    onYouTubeIframeAPIReady: () => void;
+  }
+}
 
 const HeroRight = () => {
   const ref = useRef<HTMLInputElement>(null);
-
-  async function nowPlayingTrack() {
-    const res = await axios.get("/api/track");
-    const data = res.data;
-    console.log(data);
-  }
+  const playerRef = useRef<any>(null);
+  const [nowPlaying, setNowPlaying] = useState<any>(null);
+  const [playerReady, setPlayerReady] = useState(false);
 
   function extractYouTubeId(url: string): string | null {
     try {
@@ -29,7 +32,7 @@ const HeroRight = () => {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (ref.current === null || ref.current.value.trim() === "") {
+    if (!ref.current || ref.current.value.trim() === "") {
       alert("Please enter a valid YouTube link.");
       return;
     }
@@ -41,11 +44,9 @@ const HeroRight = () => {
     }
 
     try {
-      const res = await axios.post("/api/track", {
-        youtubeId,
-      });
+      await axios.post("/api/track", { youtubeId });
       alert("Track added!");
-    } catch (error) {
+    } catch {
       alert("Error adding track. It might already exist.");
     }
 
@@ -53,30 +54,112 @@ const HeroRight = () => {
     ref.current.focus();
   }
 
+  async function loadNowPlaying() {
+    try {
+      const res = await axios.get("/api/nowplaying");
+      setNowPlaying(res.data.nowPlaying);
+    } catch {
+      setNowPlaying(null);
+    }
+  }
+
+  useEffect(() => {
+    if (!window.YT) {
+      const tag = document.createElement("script");
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName("script")[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+      window.onYouTubeIframeAPIReady = () => {
+        setPlayerReady(true);
+      };
+    } else {
+      setPlayerReady(true);
+    }
+  }, []);
+
+  // Initialize and manage YouTube player
+  useEffect(() => {
+    if (!playerReady || !nowPlaying?.youtubeId) return;
+
+    try {
+      if (playerRef.current) {
+        playerRef.current.loadVideoById(nowPlaying.youtubeId);
+      } else {
+        playerRef.current = new window.YT.Player("youtube-player", {
+          height: '360',
+          width: '640',
+          videoId: nowPlaying.youtubeId,
+          playerVars: {
+            autoplay: 1,
+            modestbranding: 1,
+            rel: 0,
+          },
+          events: {
+            onReady: (event: any) => {
+              event.target.playVideo();
+            },
+            onStateChange: (event: any) => {
+              if (event.data === window.YT.PlayerState.ENDED) {
+                loadNowPlaying();
+              }
+            },
+            onError: (event: any) => {
+              console.error("YouTube Player Error:", event);
+              loadNowPlaying(); // Load next song on error
+            }
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Error initializing YouTube player:", error);
+    }
+  }, [playerReady, nowPlaying]);
+
+  useEffect(() => {
+    loadNowPlaying();
+  }, []);
+
   return (
-    <div>
+    <div className="bg-black/20 backdrop-blur-sm rounded-xl p-6 border border-pink-900/20">
       <h1 className="text-white text-xl font-medium mb-10">Add a Song</h1>
-      <form action="">
+      <form>
         <input
           ref={ref}
           type="text"
-          placeholder="Paste a youtube link here"
+          placeholder="Paste a YouTube link here"
           className="bg-gray-800 p-2 w-full rounded-md text-gray-200 border-1"
         />
         <button
-          className="text-gray-100 bg-pink-600 w-full mt-2 rounded-md p-2 cursor-pointer font-medium "
+          className="text-gray-100 bg-pink-600 w-full mt-2 rounded-md p-2 cursor-pointer font-medium"
           onClick={handleSubmit}
         >
           Add to Queue
         </button>
       </form>
-      <div>
-        <h1 className="text-white text-xl font-medium mt-10 mb-5">
-          Now Playing
-        </h1>
-        <div className="bg-gray-800 p-4 rounded-md">
-          <p className="text-white">No song is currently playing.</p>
-        </div>
+
+      <div className="mt-10">
+        <h1 className="text-white text-xl font-medium mb-5">Now Playing</h1>
+        {nowPlaying ? (
+          <div className="bg-black/30 p-4 rounded-lg border border-pink-900/10">
+            <h2 className="text-white font-semibold">{nowPlaying.title}</h2>
+            <p className="text-pink-400 text-sm">{nowPlaying.artist}</p>
+            <p className="text-gray-400 text-xs mt-1">
+              Votes: {nowPlaying.voteCount} (▲ {nowPlaying.upvotes} / ▼{" "}
+              {nowPlaying.downvotes})
+            </p>
+            <div className="mt-4 relative w-full aspect-video rounded-lg overflow-hidden">
+              <div 
+                id="youtube-player" 
+                className="absolute inset-0 w-full h-full rounded-lg"
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="bg-black/30 p-6 rounded-lg border border-pink-900/10 text-center">
+            <p className="text-gray-400">No song is currently playing</p>
+          </div>
+        )}
       </div>
     </div>
   );
