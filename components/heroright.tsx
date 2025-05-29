@@ -2,18 +2,52 @@
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 
+// Add a minimal YT type declaration for TypeScript
 declare global {
+  namespace YT {
+    interface Player {
+      loadVideoById(videoId: string): void;
+      playVideo(): void;
+    }
+    interface PlayerEvent {
+      target: Player;
+    }
+    interface OnStateChangeEvent {
+      data: number;
+      target: Player;
+    }
+    interface OnErrorEvent {
+      data: number;
+      target: Player;
+    }
+    enum PlayerState {
+      ENDED = 0,
+      PLAYING = 1,
+      PAUSED = 2,
+      BUFFERING = 3,
+      CUED = 5,
+    }
+  }
   interface Window {
-    YT: any;
+    YT: typeof YT;
     onYouTubeIframeAPIReady: () => void;
   }
 }
 
+interface NowPlayingTrack {
+  youtubeId: string;
+  title: string;
+  artist: string;
+  voteCount: number;
+  upvotes: number;
+  downvotes: number;
+}
+
 const HeroRight = () => {
   const ref = useRef<HTMLInputElement>(null);
-  const playerRef = useRef<any>(null);
-  const [nowPlaying, setNowPlaying] = useState<any>(null);
-  const [playerReady, setPlayerReady] = useState(false);
+  const playerRef = useRef<YT.Player | null>(null);
+  const [nowPlaying, setNowPlaying] = useState<NowPlayingTrack | null>(null);
+  const [playerReady, setPlayerReady] = useState<boolean>(false);
 
   function extractYouTubeId(url: string): string | null {
     try {
@@ -29,7 +63,7 @@ const HeroRight = () => {
     }
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     if (!ref.current || ref.current.value.trim() === "") {
@@ -86,7 +120,7 @@ const HeroRight = () => {
       if (playerRef.current) {
         playerRef.current.loadVideoById(nowPlaying.youtubeId);
       } else {
-        playerRef.current = new window.YT.Player("youtube-player", {
+        playerRef.current = new (window.YT as any).Player("youtube-player", {
           height: "360",
           width: "640",
           videoId: nowPlaying.youtubeId,
@@ -94,17 +128,19 @@ const HeroRight = () => {
             autoplay: 1,
             modestbranding: 1,
             rel: 0,
+            controls: 0, // 🔒 Hide controls (no pause/seek)
+            disablekb: 1, // 🔒 Disable keyboard controls
           },
           events: {
-            onReady: (event: any) => {
+            onReady: (event: YT.PlayerEvent) => {
               event.target.playVideo();
             },
-            onStateChange: (event: any) => {
+            onStateChange: (event: YT.OnStateChangeEvent) => {
               if (event.data === window.YT.PlayerState.ENDED) {
                 loadNowPlaying();
               }
             },
-            onError: (event: any) => {
+            onError: (event: YT.OnErrorEvent) => {
               console.error("YouTube Player Error:", event);
               loadNowPlaying(); // Load next song on error
             },
@@ -123,7 +159,7 @@ const HeroRight = () => {
   return (
     <div className="bg-black/20 backdrop-blur-sm rounded-xl p-6 border border-pink-900/20">
       <h1 className="text-white text-xl font-medium mb-10">Add a Song</h1>
-      <form>
+      <form onSubmit={handleSubmit}>
         <input
           ref={ref}
           type="text"
@@ -132,7 +168,7 @@ const HeroRight = () => {
         />
         <button
           className="text-gray-100 bg-pink-600 w-full mt-2 rounded-md p-2 cursor-pointer font-medium"
-          onClick={handleSubmit}
+          type="submit"
         >
           Add to Queue
         </button>

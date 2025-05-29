@@ -1,11 +1,11 @@
 "use client";
-import { ClerkProvider, UserButton, useUser } from "@clerk/nextjs";
+import { UserButton, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import React, { useState } from "react";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { isSignedIn, user } = useUser();
+  const { isSignedIn } = useUser();
 
   return (
     <nav className="bg-black/50 fixed w-full backdrop-blur-sm border-b border-pink-900/40 z-50">

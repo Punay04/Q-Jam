@@ -67,11 +67,15 @@ export async function POST(req: NextRequest) {
       });
     }
   } catch (error) {
-    return new Response("Error fetching video details", { status: 500 });
+    return NextResponse.json({
+      message: "Error fetching video details",
+      error: error instanceof Error ? error.message : "Unknown error",
+      status: 500,
+    });
   }
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   await connectToDatabase();
   const user = await auth();
   if (!user) {
@@ -122,6 +126,10 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(tracksWithVotes);
   } catch (error) {
-    return new Response("Error fetching tracks", { status: 500 });
+    return NextResponse.json({
+      message: "Error fetching tracks",
+      error: error instanceof Error ? error.message : "Unknown error",
+      status: 500,
+    });
   }
 }

@@ -1,5 +1,4 @@
 import Navbar from "@/components/navbar";
-import { TextHoverEffect } from "@/components/ui/text-hover-effect";
 import { ClerkProvider } from "@clerk/nextjs";
 import Link from "next/link";
 import React from "react";

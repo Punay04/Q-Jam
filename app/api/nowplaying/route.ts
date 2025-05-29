@@ -2,9 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "@/lib/db";
 import Track from "@/models/track";
 import Vote from "@/models/vote";
-import mongoose from "mongoose";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   await connectToDatabase();
 
   try {

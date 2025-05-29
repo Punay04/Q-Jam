@@ -1,17 +1,6 @@
 import type { Metadata } from "next";
 import { Caveat_Brush, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ClerkProvider } from "@clerk/clerk-react";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 const caveat = Caveat_Brush({
   variable: "--font-caveat",

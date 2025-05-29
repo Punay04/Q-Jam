@@ -1,7 +1,7 @@
 "use client";
 import Navbar from "@/components/navbar";
 import HeroSection from "@/components/herosection";
-import { ClerkProvider, UserButton } from "@clerk/nextjs";
+import { ClerkProvider } from "@clerk/nextjs";
 import React, { useEffect } from "react";
 import axios from "axios";
 
