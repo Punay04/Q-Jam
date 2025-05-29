@@ -87,8 +87,8 @@ const HeroRight = () => {
         playerRef.current.loadVideoById(nowPlaying.youtubeId);
       } else {
         playerRef.current = new window.YT.Player("youtube-player", {
-          height: '360',
-          width: '640',
+          height: "360",
+          width: "640",
           videoId: nowPlaying.youtubeId,
           playerVars: {
             autoplay: 1,
@@ -107,7 +107,7 @@ const HeroRight = () => {
             onError: (event: any) => {
               console.error("YouTube Player Error:", event);
               loadNowPlaying(); // Load next song on error
-            }
+            },
           },
         });
       }
@@ -149,8 +149,8 @@ const HeroRight = () => {
               {nowPlaying.downvotes})
             </p>
             <div className="mt-4 relative w-full aspect-video rounded-lg overflow-hidden">
-              <div 
-                id="youtube-player" 
+              <div
+                id="youtube-player"
                 className="absolute inset-0 w-full h-full rounded-lg"
               />
             </div>

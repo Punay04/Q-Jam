@@ -1,5 +1,5 @@
 "use client";
-import { UserButton, useUser } from "@clerk/nextjs";
+import { ClerkProvider, UserButton, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import React, { useState } from "react";
 

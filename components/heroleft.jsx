@@ -20,13 +20,27 @@ const HeroLeft = () => {
   }, []);
 
   const handleVote = async (songId, voteType) => {
+    const votedTrackIds = JSON.parse(
+      localStorage.getItem("votedTrackIds") || "[]"
+    );
+
+    if (votedTrackIds.includes(songId)) {
+      alert("You have already voted for this song.");
+      return;
+    }
+
     try {
-      const response = await axios.post(`/api/vote`, {
+      await axios.post(`/api/vote`, {
         voteType,
         trackId: songId,
       });
+
       const updatedSongs = await axios.get(`/api/track`);
       setUpcomingSongs(updatedSongs.data);
+
+      // Store vote in localStorage
+      const newVoted = [...votedTrackIds, songId];
+      localStorage.setItem("votedTrackIds", JSON.stringify(newVoted));
     } catch (error) {
       console.error("Error voting:", error);
     }
